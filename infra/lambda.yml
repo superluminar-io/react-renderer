@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: React SSR
+
+Globals:
+  Function:
+    Runtime: nodejs10.x
+    Timeout: 30
+
+Resources:
+  Renderer:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dist
+      Handler: lambda.handler
+      Layers:
+        - arn:aws:lambda:eu-central-1:198537873635:layer:react:1
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: AllAtOnce
+
+      Events:
+        HttpRoot:
+          Type: Api
+          Properties:
+            Method: ANY
+            Path: /
+        HttpSubPaths:
+          Type: Api
+          Properties:
+            Method: ANY
+            Path: /{proxy+}
+
+Outputs:
+  GatewayHost:
+    Value: !Sub ${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com
+  GatewayURL:
+    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
+  GatewayID:
+    Value: !Sub ${ServerlessRestApi}

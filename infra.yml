@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Serverless React SSR
+
+Resources:
+  Lambda:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./infra/lambda.yml
+
+  Cloudfront:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./infra/cloudfront.yml
+      Parameters:
+        CacheTTL: !Ref CacheTTL
+        GatewayHost: !GetAtt Lambda.Outputs.GatewayHost
+
+Parameters:
+  CacheTTL:
+    Type: Number
+
+Outputs:
+  URLCloudFront:
+    Value: !Sub https://${Cloudfront.Outputs.DomainName}
+  URLGateway:
+    Value: !GetAtt Lambda.Outputs.GatewayURL

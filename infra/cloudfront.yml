@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFront CDN
+
+Resources:
+  CloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        PriceClass: PriceClass_100
+        HttpVersion: http2
+        Origins:
+          - Id: Renderer
+            DomainName: !Ref GatewayHost
+            OriginPath: /Prod
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+        DefaultCacheBehavior:
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+          TargetOriginId: Renderer
+          DefaultTTL: !Ref CacheTTL
+          Compress: true
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: all
+            Headers:
+              - Accept
+              - Accept-Language
+              - Origin
+              - Referer
+          ViewerProtocolPolicy: redirect-to-https
+
+Parameters:
+  GatewayHost:
+    Type: String
+  CacheTTL:
+    Type: Number
+
+Outputs:
+  DistributionID:
+    Value: !Ref CloudFront
+  DomainName:
+    Value: !GetAtt CloudFront.DomainName
